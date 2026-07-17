@@ -1,20 +1,29 @@
 import type { FastifyInstance } from "fastify";
+import type { ZodTypeProvider } from "fastify-type-provider-zod";
+import { z } from "zod";
 import { taskController } from "./task.controller";
+import { TaskCreateSchema, TaskUpdateSchema } from "./task.schema";
 
-export async function TaskRoutes(app: FastifyInstance){
-    app.post('/task', (request, reply) => {
-        return taskController.createTask(request, reply)
-    })
+export async function TaskRoutes(app: FastifyInstance) {
+    const server = app.withTypeProvider<ZodTypeProvider>()
 
-    app.get('/task/:id', (request, reply) => {
-        return taskController.getTaskByID(request, reply)
-    })
+    server.post('/task', {
+        schema: { tags: ['Task'], body: TaskCreateSchema },
+    }, (request, reply) => taskController.createTask(request, reply))
 
-    app.put('/task/:id', (request, reply) => {
-        return taskController.updateTask(request, reply)
-    })
+    server.get('/task/:id', {
+        schema: { tags: ['Task'], params: z.object({ id: z.string() }) },
+    }, (request, reply) => taskController.getTaskByID(request, reply))
 
-    app.delete('/task/:id', (request, reply) => {
-        return taskController.deleteTask(request, reply)
-    })
+    server.put('/task/:id', {
+        schema: {
+            tags: ['Task'],
+            params: z.object({ id: z.string() }),
+            body: TaskUpdateSchema,
+        },
+    }, (request, reply) => taskController.updateTask(request, reply))
+
+    server.delete('/task/:id', {
+        schema: { tags: ['Task'], params: z.object({ id: z.string() }) },
+    }, (request, reply) => taskController.deleteTask(request, reply))
 }
