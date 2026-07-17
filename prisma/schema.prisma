@@ -12,9 +12,16 @@ datasource db {
   provider = "postgresql"
 }
 
-model User {
-  id        String    @id @default(uuid())
-  name      String    @db.VarChar(30)
-  email     String    @unique @db.VarChar(40)
-  age       Int       @db.Integer
+enum status {
+  active
+  inactive
+}
+
+model Task {
+  id           String    @id @default(uuid())
+  title        String    @db.VarChar(30)
+  description  String    @db.VarChar(40)
+  status       status   
+  priority     String    @db.VarChar(50)
+  created_at   DateTime  @db.Timestamptz() @default(now())
 }
